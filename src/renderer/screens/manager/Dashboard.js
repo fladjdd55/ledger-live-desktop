@@ -18,9 +18,18 @@ type Props = {
   deviceInfo: DeviceInfo,
   result: ?ListAppsResult,
   onReset: () => void,
+  proceedToAppReinstall: (string[]) => void,
+  appsToRestore: string[],
 };
 
-const Dashboard = ({ device, deviceInfo, result, onReset }: Props) => {
+const Dashboard = ({
+  device,
+  deviceInfo,
+  result,
+  onReset,
+  proceedToAppReinstall,
+  appsToRestore,
+}: Props) => {
   const { t } = useTranslation();
   const currentDevice = useSelector(getCurrentDevice);
   const [firmwareUpdateOpened, setFirmwareUpdateOpened] = useState(false);
@@ -71,6 +80,7 @@ const Dashboard = ({ device, deviceInfo, result, onReset }: Props) => {
           device={device}
           deviceInfo={deviceInfo}
           result={result}
+          appsToRestore={appsToRestore}
           exec={exec}
           render={disableFirmwareUpdate => (
             <FirmwareUpdate
@@ -79,6 +89,8 @@ const Dashboard = ({ device, deviceInfo, result, onReset }: Props) => {
               deviceInfo={deviceInfo}
               setFirmwareUpdateOpened={setFirmwareUpdateOpened}
               disableFirmwareUpdate={disableFirmwareUpdate}
+              installed={result.installed}
+              proceedToAppReinstall={proceedToAppReinstall}
             />
           )}
         />
@@ -88,6 +100,7 @@ const Dashboard = ({ device, deviceInfo, result, onReset }: Props) => {
           device={device}
           deviceInfo={deviceInfo}
           setFirmwareUpdateOpened={setFirmwareUpdateOpened}
+          proceedToAppReinstall={proceedToAppReinstall}
         />
       )}
     </Box>

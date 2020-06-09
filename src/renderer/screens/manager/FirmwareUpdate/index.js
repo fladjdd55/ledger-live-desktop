@@ -3,6 +3,7 @@
 import React, { PureComponent } from "react";
 import { Trans } from "react-i18next";
 import { getDeviceModel } from "@ledgerhq/devices";
+import type { InstalledItem } from "@ledgerhq/live-common/lib/apps/types";
 import type { DeviceInfo, FirmwareUpdateContext } from "@ledgerhq/live-common/lib/types/manager";
 import { command } from "~/renderer/commands";
 import type { Device } from "~/renderer/reducers/devices";
@@ -22,6 +23,8 @@ type Props = {
   device: Device,
   setFirmwareUpdateOpened: boolean => void,
   disableFirmwareUpdate?: boolean,
+  installed?: InstalledItem[],
+  proceedToAppReinstall: (string[]) => void,
 };
 
 type State = {
@@ -82,8 +85,12 @@ class FirmwareUpdate extends PureComponent<Props, State> {
 
   _unmounting = false;
 
-  handleCloseModal = () => {
+  handleCloseModal = (reinstall?: boolean) => {
     this.setState({ modal: "closed" });
+    const { proceedToAppReinstall, installed } = this.props;
+    if (reinstall && installed) {
+      proceedToAppReinstall(installed.map(a => a.name));
+    }
   };
 
   handleDisclaimerModal = () => {
@@ -93,7 +100,13 @@ class FirmwareUpdate extends PureComponent<Props, State> {
   handleDisclaimerNext = () => this.setState({ modal: "install" });
 
   render() {
-    const { deviceInfo, device, setFirmwareUpdateOpened, disableFirmwareUpdate } = this.props;
+    const {
+      deviceInfo,
+      device,
+      setFirmwareUpdateOpened,
+      disableFirmwareUpdate,
+      installed,
+    } = this.props;
     const { firmware, modal, stepId, ready, error } = this.state;
 
     if (!firmware) return null;
@@ -119,7 +132,8 @@ class FirmwareUpdate extends PureComponent<Props, State> {
           </Text>
         </Box>
 
-        {lte(deviceInfo.version, "1.4.2") && (
+        {// TODO move this knowledge in live-common
+        device.modelId === "nanoS" && lte(deviceInfo.version, "1.4.2") && (
           <Box px={4} horizontal alignItems="center" color="palette.primary.main">
             <IconInfoCircle size={12} />
             <Text style={{ marginLeft: 6 }} ff="Inter" fontSize={4}>
@@ -147,6 +161,7 @@ class FirmwareUpdate extends PureComponent<Props, State> {
               withResetStep={hasResetStep(deviceInfo, device.modelId)}
               status={modal}
               stepId={stepId}
+              installed={installed}
               onClose={this.handleCloseModal}
               firmware={firmware}
               error={error}

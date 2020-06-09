@@ -52,10 +52,11 @@ type Props = {
   exec: Exec,
   t: TFunction,
   render?: boolean => React$Node,
+  appsToRestore?: string[],
 };
 
-const AppsList = ({ deviceInfo, result, exec, t, render }: Props) => {
-  const [state, dispatch] = useAppsRunner(result, exec);
+const AppsList = ({ deviceInfo, result, exec, t, render, appsToRestore }: Props) => {
+  const [state, dispatch] = useAppsRunner(result, exec, appsToRestore);
   const [appInstallDep, setAppInstallDep] = useState(undefined);
   const [appUninstallDep, setAppUninstallDep] = useState(undefined);
   const isIncomplete = isIncompleteState(state);
